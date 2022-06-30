@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+*.uf2
 
 # Ide settings
 .idea
