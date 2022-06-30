@@ -32,6 +32,9 @@
 *.app
 *.uf2
 
+# Build Directory
+/build
+
 # Ide settings
 .idea
 .vscode
