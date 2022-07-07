@@ -8,6 +8,8 @@
 
 #include "hardware/i2c.h"
 
+#include "pico-sht3x/sht3x.h"
+
 #define MOT_ENABLE  0
 #define MOT_MS1     1
 #define MOT_MS2     2
@@ -22,6 +24,8 @@
 #define I2C_SCL     27
 
 int main() {
+
+    //i2c_write_blocking( i2c0, addr, data, 2,  );
 
     // Init I/O
     stdio_init_all();
@@ -63,7 +67,7 @@ int main() {
         gpio_put( 18, 0 );
         gpio_put( 20, 1 );
 
-        /*
+        
         while (true) {
             gpio_put( 18, 1 );
             printf( "LED ON!\n" );
@@ -72,7 +76,7 @@ int main() {
             printf( "LED OFF!\n" );
             sleep_ms(1000);
         }
-        */
+        
 
 
 
