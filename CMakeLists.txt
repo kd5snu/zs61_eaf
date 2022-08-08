@@ -13,7 +13,8 @@ endif()
 
 set(FOCUSER_PATH ${PROJECT_SOURCE_DIR})
 
-set( PICO_BOARD "pimoroni_tiny2040")
+#set( PICO_BOARD "pimoroni_tiny2040")
+set( PICO_BOARD "pico" )
 
 # Initialize the SDK
 pico_sdk_init()
@@ -24,13 +25,14 @@ add_subdirectory(pico-sht3x)
 # Add focuser source
 #add_subdirectory(focuser)
 
-add_executable(focuser
-        focuser.cpp
+add_executable(${PROJECT_NAME}
+        main.cpp
+        Focuser.cpp
         )
 
 # pull in common dependencies
 #target_link_libraries(focuser pico_stdlib)
-target_link_libraries(focuser
+target_link_libraries(${PROJECT_NAME}
     pico_ssd1306
     pico_sht3x
     pico_stdlib
@@ -38,8 +40,8 @@ target_link_libraries(focuser
 
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(focuser 0)
-pico_enable_stdio_uart(focuser 1)
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(focuser)
+pico_add_extra_outputs(${PROJECT_NAME})

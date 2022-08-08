@@ -1,84 +1,77 @@
-#include <stdio.h>
+#include "Focuser.h"
 
-#include "pico/stdlib.h"
-#include "boards/pimoroni_tiny2040.h"
+Focuser::Focuser()
+{
+    temperature = 0.0;
+    humidity = 0.0;
+    targetPos = 0;
+    currPos = 0;
+}
 
-#include "pico-ssd1306/ssd1306.h"
-#include "pico-ssd1306/textRenderer/TextRenderer.h"
+Focuser::Focuser( float t, float h, uint32_t tPos, uint32_t cPos )
+{
+    temperature = t;
+    humidity = h;
+    targetPos = tPos;
+    currPos = cPos;
+}
 
-#include "hardware/i2c.h"
+void Focuser::setTemp( float temp )
+{
+    temperature = temp;
+}
 
-#include "pico-sht3x/sht3x.h"
+uint32_t Focuser::getTargetPosition()
+{
+    return targetPos;
+}
 
-#define MOT_ENABLE  0
-#define MOT_MS1     1
-#define MOT_MS2     2
-#define MOT_MS3     3
-#define MOT_RST     4
-#define MOT_SLP     5
-#define MOT_STEP    6
-#define MOT_DIR     7
+void Focuser::setTargetPosition( uint32_t position )
+{
+    targetPos = position;
+}
 
-//#define I2C_PORT    'i2c1'
-#define I2C_SDA     26
-#define I2C_SCL     27
+uint32_t Focuser::getCurrentPosition()
+{
+    return currPos;
+}
 
-int main() {
+void Focuser::setCurrentPosition( uint32_t position )
+{
+    currPos = position;
+}
 
-    //i2c_write_blocking( i2c0, addr, data, 2,  );
+void Focuser::updateScreen( pico_ssd1306::SSD1306 display )
+{
+    display.clear();
 
-    // Init I/O
-    stdio_init_all();
+    const char tempPrefix[]     = "Temp:   ";
+    const char humidPrefix[]    = "Humid:  ";
+    const char tgtPrefix[]      = "Target: ";
+    const char curPrefix[]      = "Curr:   ";
 
-    // Init I2C
-    i2c_init( i2c1, 1000000);
-    gpio_set_function( I2C_SDA, GPIO_FUNC_I2C );
-    gpio_set_function( I2C_SCL, GPIO_FUNC_I2C );
-    gpio_pull_up( I2C_SDA );
-    gpio_pull_up( I2C_SCL );
+    const char tempSuffix[]     = " dC";
+    const char humidSuffix[]    = " %RH";
 
-    sleep_ms( 250 );
+    char tempBuffer[11];
+    char humidBuffer[11];
+    char targetBuffer[11];
+    char currentBuffer[11];
 
-    // Init Display
-    pico_ssd1306::SSD1306 display = pico_ssd1306::SSD1306( i2c1, 0x3C, pico_ssd1306::Size::W128xH32 );
+    std::snprintf( tempBuffer,    11, "%10.1f", temperature );
+    std::snprintf( humidBuffer,   11, "%10.1f", humidity );
+    std::snprintf( targetBuffer,  11, "%10u",   targetPos );
+    std::snprintf( currentBuffer, 11, "%10u",   currPos );
 
-    display.setOrientation(0);
-    display.setContrast( 64 );
+    std::string tempText    = std::string( tempPrefix )  + tempBuffer  + tempSuffix;
+    std::string humidText   = std::string( humidPrefix ) + humidBuffer + humidSuffix;
+    std::string targetText  = std::string( tgtPrefix )   + targetBuffer;
+    std::string currentText = std::string( curPrefix )   + currentBuffer;
 
-    drawText( &display, font_5x8, "Temp:",     0, 0 );
-    drawText( &display, font_5x8, "Humid:",    0, 8 );
-    drawText( &display, font_5x8, "Tgt Pos:",  0, 16 );
-    drawText( &display, font_5x8, "Cur Pos:",  0, 24 );
+    drawText( &display, font_5x8, tempText.c_str(),     0,  0 );
+    drawText( &display, font_5x8, humidText.c_str(),    0,  8 );
+    drawText( &display, font_5x8, targetText.c_str(),   0, 16 );
+    drawText( &display, font_5x8, currentText.c_str(),  0, 24 );
 
-    display.sendBuffer(); //Send buffer to device and show on screen
-    
-
-    // #ifndef PICO_DEFAULT_LED_PIN
-    // #warning blink example requires a board with a regular LED
-    // #else
-        const uint LED_PIN = PICO_DEFAULT_LED_PIN;
-        gpio_init(LED_PIN);
-        gpio_init( 18 ); // Red
-        gpio_init( 20 ); // Blue
-        gpio_set_dir(18, GPIO_OUT);
-        gpio_set_dir(LED_PIN, GPIO_OUT);
-        gpio_set_dir(20, GPIO_OUT);
-        gpio_put(LED_PIN, 1);
-        gpio_put( 18, 0 );
-        gpio_put( 20, 1 );
-
-        
-        while (true) {
-            gpio_put( 18, 1 );
-            printf( "LED ON!\n" );
-            sleep_ms(1000);
-            gpio_put(18, 0);
-            printf( "LED OFF!\n" );
-            sleep_ms(1000);
-        }
-        
-
-
-
-    // #endif
+    display.sendBuffer();
 }
