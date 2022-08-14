@@ -28,6 +28,7 @@ add_subdirectory(pico-sht3x)
 add_executable(${PROJECT_NAME}
         main.cpp
         Focuser.cpp
+        Comms.cpp
         )
 
 # pull in common dependencies

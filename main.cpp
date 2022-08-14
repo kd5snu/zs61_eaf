@@ -1,15 +1,14 @@
 #include "Focuser.h"
+#include "Comms.h"
 
 #include <stdio.h>
 
-//#include "pico/stdlib.h"
+#include "pico/stdlib.h"
 #include "boards/pimoroni_tiny2040.h"
 
-//#include "pico-ssd1306/ssd1306.h"
-//#include "pico-ssd1306/textRenderer/TextRenderer.h"
-
 //#include "hardware/i2c.h"
-//#include "hardware/uart.h"
+#include "hardware/uart.h"
+#include "hardware/irq.h"
 
 // Include custom Temp/Humid library
 //#include "pico-sht3x/sht3x.h"
@@ -17,6 +16,8 @@
 // Define pins for UART (only for intitial debugging)
 #define UART_TX_PIN 16
 #define UART_RX_PIN 17
+
+#define UART_BAUD_RATE 9600
 
 // Define pins for Stepper Motor
 #define MOT_ENABLE  0
@@ -32,9 +33,16 @@
 #define I2C_SDA     26
 #define I2C_SCL     27
 
-//void updateScreen( pico_ssd1306::SSD1306, uint8_t, char* );
+uint32_t rxCount;
+char rxBuff[20];
+bool rxValid;
+
+void on_uart_rx();
 
 int main() {
+
+    rxCount = 0;
+    rxValid = false;
 
     //i2c_write_blocking( i2c0, addr, data, 2,  );
 
@@ -42,9 +50,21 @@ int main() {
     stdio_init_all();
 
     // Init Temp UART
+    uart_init( uart0, UART_BAUD_RATE );
+
     //  Using alternate pins because I'm using the Pimoroni Tiny as efficiently as I can
     gpio_set_function( UART_TX_PIN, GPIO_FUNC_UART );
     gpio_set_function( UART_RX_PIN, GPIO_FUNC_UART );
+
+    int UART_IRQ = uart0 == uart0 ? UART0_IRQ : UART1_IRQ;
+
+    // And set up and enable the interrupt handlers
+    irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
+    irq_set_enabled(UART_IRQ, true);
+
+    // Now enable the UART to send interrupts - RX only
+    uart_set_irq_enables(uart0, true, false);
+
 
     // Init I2C
     i2c_init( i2c1, 1000000);
@@ -79,12 +99,19 @@ int main() {
         gpio_put( 18, 0 );
         gpio_put( 20, 1 );
 
+        uint8_t ledStatus = 0;
+
         while (true) {
-            gpio_put( G_LED_PIN, 1 );
-            printf( "LED ON!\n" );
 
-            focuser.setTemp( 23.4 );
-            focuser.setTargetPosition( 45 );
+            ledStatus = 1 - ledStatus;
+
+            gpio_put( G_LED_PIN, ledStatus );
+            //printf( "LED ON!\n" );
+
+            //uart_puts( uart0, "Hello world 1!" );
+
+            //focuser.setTemp( 23.4 );
+            //focuser.setTargetPosition( 45 );
 
             focuser.updateScreen( display );
 
@@ -92,15 +119,56 @@ int main() {
             sleep_ms(1000);
 
 
-            gpio_put(G_LED_PIN, 0);
-            printf( "LED OFF!\n" );
+            if( rxValid )
+            {
+                uart_puts( uart0, rxBuff );
+                rxCount = 0;
+                rxValid = false;
+            }
 
-            focuser.setTemp( 67.1 );
-            focuser.setTargetPosition( 200 );
 
-            focuser.updateScreen( display );
-            sleep_ms(1000);
+            //gpio_put(G_LED_PIN, 0);
+            //printf( "LED OFF!\n" );
+
+            //uart_puts( uart0, "Hello world 2!" );
+
+            //focuser.setTemp( 67.1 );
+            //focuser.setTargetPosition( 200 );
+
+            //focuser.updateScreen( display );
+            //sleep_ms(1000);
         }
 
     #endif
+}
+
+
+void on_uart_rx()
+{
+    uint8_t ch = uart_getc( uart0 );
+
+    if( ch == ':' )
+    {
+        // Reset receive
+        rxCount = 0;
+    }
+    else if( ch == '#' )
+    {
+        rxValid = true;
+    }
+    else if( rxCount < 10 )
+    {
+        rxBuff[rxCount++] = char(ch);
+        //rxCount++;
+    }
+    else
+    {
+        rxCount = 0;
+    }
+
+}
+
+void rx_interp(  )
+{
+
 }
