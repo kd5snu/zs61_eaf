@@ -45,7 +45,7 @@ void Focuser::updateScreen( pico_ssd1306::SSD1306 display )
 {
     display.clear();
 
-    const char tempPrefix[]     = "Temp:   ";
+    const char tempPrefix[]     = "Temp2:   ";
     const char humidPrefix[]    = "Humid:  ";
     const char tgtPrefix[]      = "Target: ";
     const char curPrefix[]      = "Curr:   ";
