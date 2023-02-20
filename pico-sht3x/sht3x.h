@@ -39,7 +39,9 @@ namespace pico_sht3x
         SHT3X( i2c_inst *i2CInst, uint8_t Address );
 
         void init();
-        void read_raw( int32_t* temp, int32_t* humid );
+        void read_raw( uint32_t *temp, uint32_t *humid );
+        void read_f( float *temp, float *humid );
+        void read_c( float *temp, float *humid );
     };
 }
 

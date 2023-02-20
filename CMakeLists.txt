@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
         main.cpp
         Focuser.cpp
         Comms.cpp
+        Environment.cpp
         )
 
 # pull in common dependencies
