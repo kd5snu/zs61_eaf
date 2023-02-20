@@ -1,5 +1,6 @@
 #include "Focuser.h"
 #include "Comms.h"
+#include "Environment.h"
 
 #include <stdio.h>
 
@@ -11,7 +12,7 @@
 #include "hardware/irq.h"
 
 // Include custom Temp/Humid library
-//#include "pico-sht3x/sht3x.h"
+#include "pico-sht3x/sht3x.h"
 
 // Define pins for UART (only for intitial debugging)
 #define UART_TX_PIN 16
@@ -43,8 +44,6 @@ int main() {
 
     rxCount = 0;
     rxValid = false;
-
-    //i2c_write_blocking( i2c0, addr, data, 2,  );
 
     // Init I/O
     stdio_init_all();
@@ -84,6 +83,10 @@ int main() {
     // Init Focuser functions
     Focuser focuser;
 
+    pico_sht3x::SHT3X TempHumid( i2c1, 0x44 );
+
+    TempHumid.init();
+
     #ifndef PICO_DEFAULT_LED_PIN
         #warning blink example requires a board with a regular LED
     #else
@@ -101,6 +104,8 @@ int main() {
 
         uint8_t ledStatus = 0;
 
+        float Temp = 0.0, Humid = 0.0;
+
         while (true) {
 
             ledStatus = 1 - ledStatus;
@@ -112,6 +117,11 @@ int main() {
 
             //focuser.setTemp( 23.4 );
             //focuser.setTargetPosition( 45 );
+
+            TempHumid.read_c( &Temp, &Humid );
+
+            focuser.setTemp( Temp );
+            focuser.setHumid( Humid );
 
             focuser.updateScreen( display );
 
