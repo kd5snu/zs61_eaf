@@ -6,7 +6,7 @@ namespace pico_sht3x {
         this->address = Address;
     }
 
-    void SHT3X::init() {
+    void SHT3X::init_2hz() {
         // init with 2 measurements per second, high repeatability
         cmd_buffer[0] = 0x22;
         cmd_buffer[1] = 0x36;

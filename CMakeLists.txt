@@ -27,9 +27,9 @@ add_subdirectory(pico-sht3x)
 
 add_executable(${PROJECT_NAME}
         main.cpp
-        Focuser.cpp
-        Comms.cpp
-        Environment.cpp
+        Display.cpp
+        #Comms.cpp
+        #Environment.cpp
         )
 
 # pull in common dependencies
@@ -42,6 +42,7 @@ target_link_libraries(${PROJECT_NAME}
 
 
 # enable usb output, disable uart output
+# except for when debugging via SWD. Then disable USB and enable the UART.
 pico_enable_stdio_usb(${PROJECT_NAME} 0)
 pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
