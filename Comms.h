@@ -14,14 +14,19 @@
 class Comms
 {
     private:
-        char rxBuffer;
-        char txBuffer;
+        char rxBuffer[16];
+        char txBuffer[16];
 
         uint8_t rxCount;
         uint8_t txCount;
 
+        bool rxValid;
+
     public:
         Comms();
+
+        void uart_rx_isr();
+        void commsCheck();
 };
 
 

@@ -29,7 +29,7 @@ add_executable(${PROJECT_NAME}
         main.cpp
         Display.cpp
         #Comms.cpp
-        #Environment.cpp
+        Environment.cpp
         )
 
 # pull in common dependencies
